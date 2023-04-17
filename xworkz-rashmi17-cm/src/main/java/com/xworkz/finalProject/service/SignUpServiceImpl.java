@@ -1,11 +1,12 @@
 package com.xworkz.finalProject.service;
 
 import java.time.LocalDateTime;
-
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Set;
 
 import javax.mail.Authenticator;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.sun.xml.bind.v2.runtime.output.Encoded;
 import com.xworkz.finalProject.dto.SingUp;
 import com.xworkz.finalProject.entity.SignUpEntity;
 import com.xworkz.finalProject.repository.SignUpRepo;
@@ -80,14 +82,18 @@ public class SignUpServiceImpl implements SignUpService {
 			signUpEntity.setMobile(signDTO.getMobile());
 			signUpEntity.setConfirmPassword(passwordEncoder.encode(signDTO.getConfirmPassword()));
 			signUpEntity.setPassword(passwordEncoder.encode(signDTO.getPassword()));
-
+			signUpEntity.setResetTime(LocalTime.of(0, 0, 0));
+			signUpEntity.setResetPassword(false);
 //			BeanUtils.copyProperties(signDTO, signUpEntity);
 
 			boolean saved = this.signuprepo.save(signUpEntity);
-			log.info("Saved in serviceImpl" + saved);
-		} else {
-			return null;
+			log.info("Saved in serviceImpl:" + saved);
+			if (saved) {
+				boolean sent = this.sendEmail("", signDTO.getEmail());
+				log.info("saved in service:" + sent);
+			}
 		}
+
 		return Collections.emptySet();
 	}
 
@@ -131,8 +137,12 @@ public class SignUpServiceImpl implements SignUpService {
 		 * singUpDto.setPassword(entity1.getPassword());
 		 * singUpDto.setConfirmPassword(entity1.getConfirmPassword());
 		 */
+		log.info("Password matchinging" + passwordEncoder.matches(password, singUpDto.getPassword()));
+		log.info("Time matching" + entity1.getResetTime().isBefore(LocalTime.now()));
+		log.info("present Time" + LocalTime.now());
+		log.info("Rest time" + entity1.getResetTime());
 		BeanUtils.copyProperties(entity1, singUpDto);
-
+		log.info("Time" + LocalTime.now().isBefore(entity1.getResetTime()));
 		log.info("matching...." + passwordEncoder.matches(password, entity1.getPassword()));
 		if (entity1.getCount() >= 3) {
 			log.info("Running count attempts--" + entity1.getCount());
@@ -150,41 +160,108 @@ public class SignUpServiceImpl implements SignUpService {
 
 	}
 
-	/*
-	 * @Override public SingUp resetPassword(String email) { // TODO Auto-generated
-	 * method stub return SignUpService.super.resetPassword(email); }
-	 */
+	@Override
+	public SingUp resetPassword(String email) {
+		String reSetPassword = DefaultPasswordGenerator.generate(8);
 
-	/*
-	 * @Override public boolean sendEmail(String email) {
-	 * 
-	 * String portNumber = "587"; String hostName = "smtp.office365.com"; final
-	 * String fromEmail = "rashmidesai10@outlook.com"; final String fromPassword =
-	 * "kohlapurMahalaxmi"; String to = email;
-	 * 
-	 * Properties prop = new Properties(); prop.put("mail.smtp.host", hostName);
-	 * prop.put("mail.smtp.port", portNumber); prop.put("mail.smtp.starttls.enable",
-	 * "true"); prop.put("mail.debug", "true"); prop.put("mail.smtp.auth", "true");
-	 * prop.put("mail.transport.protocol", "smtp");
-	 * 
-	 * Session session = Session.getInstance(prop, new Authenticator() {
-	 * 
-	 * @Override protected PasswordAuthentication getPasswordAuthentication() {
-	 * return new PasswordAuthentication(fromEmail, fromPassword); }
-	 * 
-	 * });
-	 * 
-	 * MimeMessage msg = new MimeMessage(session); try { msg.setFrom(new
-	 * InternetAddress(fromEmail)); msg.setSubject("Registration Completed");
-	 * msg.setText("Thank you for Registering!!!!");
-	 * 
-	 * msg.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-	 * Transport.send(msg); System.out.println("Mail sent succesfully");
-	 * 
-	 * } catch (MessagingException e) { e.printStackTrace(); }
-	 * 
-	 * return true;
-	 * 
-	 * }
-	 */
+		log.info("Running reset password in serviceImpl" + reSetPassword);
+		SignUpEntity entity = this.signuprepo.resetPassword(email);
+		if (entity != null) {
+			log.info("Entity found in reset password" + email);
+			entity.setPassword(passwordEncoder.encode(reSetPassword));
+			entity.setUpdatedBy("System");
+			entity.setUpdatedDate(LocalDateTime.now());
+			entity.setCount(0);
+			entity.setResetPassword(true);
+			entity.setResetTime(LocalTime.now().plusSeconds(60));
+			boolean update = this.signuprepo.update(entity);
+			if (update) {
+				sendEmail(entity.getEmail(),
+						"Your reset password is:-" + reSetPassword + "  " + "Please login within 1 min");
+
+			}
+			log.info("Updated:" + update);
+			SingUp singUp = new SingUp();
+			BeanUtils.copyProperties(entity, singUp);
+			return singUp;
+
+		}
+		log.info("Entity not found for email" + email);
+		return SignUpService.super.resetPassword(email);
+	}
+
+	@Override
+	public SingUp updatePassword(String userId, String password, String confirmPassword) {
+		log.info("Update password running serviceImpl");
+		SignUpEntity entity = new SignUpEntity();
+		if (password.equals(confirmPassword)) {
+			boolean updated = this.signuprepo.updatePassword(userId, passwordEncoder.encode(password), false,
+					LocalTime.of(0, 0, 0));
+			log.info("Updated password" + updated);
+		}
+		return SignUpService.super.updatePassword(userId, password, confirmPassword);
+	}
+
+	@Override
+	public boolean sendEmail(String email, String text) {
+
+		String portNumber = "587";
+		String hostName = "smtp.office365.com";
+		final String fromEmail = "rashmidesai10@outlook.com";
+		final String fromPassword = "kohlapurMahalaxmi";
+		String to = email;
+
+		Properties prop = new Properties();
+		prop.put("mail.smtp.host", hostName);
+		prop.put("mail.smtp.port", portNumber);
+		prop.put("mail.smtp.starttls.enable", "true");
+		prop.put("mail.debug", true);
+		prop.put("mail.smtp.auth", true);
+		prop.put("mail.transport.protocol", "smtp");
+
+		Session session = Session.getInstance(prop, new Authenticator() {
+
+			@Override
+			protected PasswordAuthentication getPasswordAuthentication() {
+				return new PasswordAuthentication(fromEmail, fromPassword);
+			}
+
+		});
+
+		MimeMessage msg = new MimeMessage(session);
+		try {
+			msg.setFrom(new InternetAddress(fromEmail));
+			msg.setSubject("Registration Completed");
+			msg.setText(text);
+
+			msg.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+			Transport.send(msg);
+			System.out.println("Mail sent succesfully");
+
+		} catch (MessagingException e) {
+			e.printStackTrace();
+		}
+
+		return true;
+
+	}
+
+	public final static class DefaultPasswordGenerator {
+		private static final String[] charCategories = new String[] { "abcdefghijklmnopqrstuvwxyz",
+				"ABCDEFGHIJKLMNOPQRSTUVWXYZ", "0123456789" };
+
+		public static String generate(int length) {
+			StringBuilder password = new StringBuilder(length);
+			Random random = new Random(System.nanoTime());
+
+			for (int i = 0; i < length; i++) {
+				String charCategory = charCategories[random.nextInt(charCategories.length)];
+				int position = random.nextInt(charCategory.length());
+				password.append(charCategory.charAt(position));
+			}
+
+			return new String(password);
+		}
+	}
+
 }

@@ -17,27 +17,34 @@ public interface SignUpService {
 		return Collections.emptyList();
 
 	}
-default Long findByUser(String userId) {
-	return null;
-	
-}
-	
-default Long findByEmaiId(String email) {
-	return null;
-	
-}	
-	
-default Long findByMobileNo(Long mobile) {
-	return null;
-	
-}
 
-default SingUp signIn(String userId,String password) {
-	return null;
-}
-//boolean sendEmail(String email);
+	default Long findByUser(String userId) {
+		return null;
 
-/*
- * default SingUp resetPassword(String email) { return null; }
- */
+	}
+
+	default Long findByEmaiId(String email) {
+		return null;
+
+	}
+
+	default Long findByMobileNo(Long mobile) {
+		return null;
+
+	}
+
+	default SingUp signIn(String userId, String password) {
+		return null;
+	}
+
+	boolean sendEmail(String email, String text);
+
+	default SingUp resetPassword(String email) {
+		return null;
+	}
+
+	default SingUp updatePassword(String userId, String password, String confirmPassword) {
+		return null;
+
+	}
 }

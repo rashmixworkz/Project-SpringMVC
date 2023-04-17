@@ -28,11 +28,11 @@
 				alt="" width="90" height="30">
 			</a>
 			<div>
-<a href="index.jsp">Home</a>
-<a href="SignIn.jsp">SignIn</a>
-</div>
+				<a href="index.jsp">Home</a> <a href="SignIn.jsp">SignIn</a>
+			</div>
 		</div>
 	</nav>
-<h1>Login Success!!!!!</h1>
+
+	<h1 style="color: green;">Login Success!!!!!</h1>
 </body>
 </html>

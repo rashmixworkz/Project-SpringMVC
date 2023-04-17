@@ -1,9 +1,10 @@
 package com.xworkz.finalProject.controller;
 
-
-
+import java.time.LocalTime;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.validation.ConstraintViolation;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,27 +49,65 @@ public class SignUpController {
 	}
 
 	@PostMapping("/signin")
-	public String onSignIn(@RequestParam String userId, @RequestParam String password, Model model) {
+	public String onSignIn(@RequestParam String userId, @RequestParam String password, Model model,
+			HttpServletRequest request) {
 		log.info("Running signin method in controller");
 		try {
-		SingUp dto = this.signUpService.signIn(userId, password);
-		
-		if(dto.getCount()>=3) {
-			model.addAttribute("message", "Account locked Please Reset the password Again");
-			return "SignIn";
-		}
-		else if (dto != null) {
-			log.info("UserId and Password are matching");
-			model.addAttribute("list", dto);
-			return "LoginSuccessPage";
+			SingUp dto = this.signUpService.signIn(userId, password);
 
-		}
-		}
-		catch(Exception e){
+			if (dto.getCount() >= 3) {
+				model.addAttribute("message", "Account locked Please Reset the password Again");
+				return "SignIn";
+			} else if (dto != null) {
+				log.info("UserId and Password are matching");
+				if (dto.getResetPassword() == true) {
+					log.info("Running Reset true condition in controller");
+					if (!dto.getResetTime().isAfter(LocalTime.now())) {
+						log.info("Running reset time in controller");
+						model.addAttribute("alert", "Your Timeout Please Reset password again");
+						return "SignIn";
+					}
+					model.addAttribute("userID", dto.getUserId());
+					log.info("Running in reset condition");
+					log.info("ResetPassword---" + dto.getResetPassword());
+					log.info("Timer-----" + dto.getResetTime().isBefore(LocalTime.now()));
+					return "UpdatePassword";
+				}
+				System.currentTimeMillis();
+				log.info("User ID and password is matched");
+				HttpSession httpSession = request.getSession(true);
+				httpSession.setAttribute("userID", dto.getUserId());
+				return "LoginSuccessPage";
+			}
+
+		} catch (Exception e) {
 			log.info(e.getMessage());
 		}
 		model.addAttribute("errorMsg", "UserId or Password not Matching");
 		return "SignIn";
+
+	}
+
+	@PostMapping("/reset")
+	public String resetPassword(String email, Model model) {
+		log.info("Running reset password in controller");
+		try {
+			SingUp up = this.signUpService.resetPassword(email);
+			if (up.getResetPassword() == true) {
+				model.addAttribute("message", "Password reset successfully please login within 1 min ");
+				return "ResetPassword";
+			}
+		} catch (Exception e) {
+			log.info(e.getMessage());
+		}
+		return "ResetPassword";
+
+	}
+
+	@PostMapping("/updatePassword")
+	public String updatePassword(String userId, String password, String confirmPassword) {
+		this.signUpService.updatePassword(userId, password, confirmPassword);
+		return "UpdateSuccesPage";
 
 	}
 

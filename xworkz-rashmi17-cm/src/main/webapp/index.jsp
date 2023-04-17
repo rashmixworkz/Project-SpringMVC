@@ -8,6 +8,7 @@
 <meta charset="ISO-8859-1">
 
 <title>X-workz</title>
+
 <link
 	href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
 	rel="stylesheet"
@@ -17,7 +18,9 @@
 <script
 	src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
 	integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-	crossorigin="anonymous"></script>
+	crossorigin="anonymous">
+	
+</script>
 </head>
 <body>
 
@@ -26,7 +29,13 @@
 			<a class="navbar-brand" href="#"> <img
 				src="https://x-workz.in/static/media/Logo.cf195593dc1b3f921369.png"
 				alt="" width="90" height="30">
-			</a> <a href="SignIn.jsp">SignIn</a>
+			</a>
+
+			<ul class="nav justify-content-center">
+				<li class="nav-item"><a 
+					aria-current="page" href="SignIn.jsp">Login</a></li>
+			</ul>
+
 		</div>
 	</nav>
 
@@ -34,8 +43,8 @@
 		Page</h1>
 	<br>
 	<h3 class="text-center" style="color: green;">${message}</h3>
-    <h3 class="text-center" style="color: red;">${errorMsg}</h3>
-   
+	<h3 class="text-center" style="color: red;">${errorMsg}</h3>
+
 
 
 
@@ -93,8 +102,10 @@
 					onclick="onAgreement()" /> Accept Agreement
 				</label>
 			</div>
+			<div align="center">
 			<input type="submit" class="btn btn-primary" value="SignUp"
-				id="submitId" disabled="true" />
+				id="submitId" disabled="true"/>
+				</div>
 		</form>
 	</div>
 	<script>
@@ -159,21 +170,22 @@
 			var mobileInput = document.getElementById('mnumber');
 			var mobileValue = mnumber.value;
 			console.log(mobileValue);
-			if (mobileValue != null && mobileValue != "" && mobileValue.length == 10) {
+			if (mobileValue != null && mobileValue != ""
+					&& mobileValue.length == 10) {
 				console.log('Valid Mobile number');
-			
-			const xhttp = new XMLHttpRequest();
-			console.log('Running in ajax');
-			console.log(mobileValue);
-			xhttp.open("GET",
-					"http://localhost:8089/xworkz-rashmi17-cm/randomNumber/"
-							+ mobileValue);
-			xhttp.send();
-			xhttp.onload = function() {
-				console.log(this);
-				document.getElementById("displayNumber").innerHTML = this.responseText
-			}
-			document.getElementById('mnumberErropr').innerHTML = '';
+
+				const xhttp = new XMLHttpRequest();
+				console.log('Running in ajax');
+				console.log(mobileValue);
+				xhttp.open("GET",
+						"http://localhost:8089/xworkz-rashmi17-cm/randomNumber/"
+								+ mobileValue);
+				xhttp.send();
+				xhttp.onload = function() {
+					console.log(this);
+					document.getElementById("displayNumber").innerHTML = this.responseText
+				}
+				document.getElementById('mnumberErropr').innerHTML = '';
 			} else {
 				console.log('InValid Mobile Number');
 				document.getElementById('mnumberErropr').innerHTML = 'please enter valid mobile number';

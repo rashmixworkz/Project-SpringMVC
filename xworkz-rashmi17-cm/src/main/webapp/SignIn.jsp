@@ -29,53 +29,60 @@
 				alt="" width="90" height="30">
 			</a>
 			<div>
-<a href="index.jsp">Home</a>
-</div>
+				<a href="index.jsp">Home</a> <a
+					href="UpdatePassword.jsp">Update</a>
+			</div>
 		</div>
 	</nav>
-<h1 class="text-center" style="color:orange;">Welcome To SignIn Page</h1>
+	<h1 class="text-center" style="color: orange;">	Login To Your Account</h1>
 
-<h4 style="color: red;">${errorMsg}</h4>
-<h3 style="color: red;">${message}</h3>
-<div class="container d-lg-flex justify-content-center">
-<form action="signin" method="post">
+	<h5 class="text-center" style="color: red;">${errorMsg}</h5>
+	<h6 class="text-center" style="color: red;">${message}</h6>
+	<h5 class="text-center" style="color: red;">${alert}</h5>
+	<div class="container d-lg-flex justify-content-center">
+		<form action="signin" method="post">
 
-<div class="mb-3 mt-3">
-    <label for="user" class="form-label">UserId:</label>
-    <input type="text" class="form-control" id="user" placeholder="Enter your userId" name="userId" onchange="onUserId()"/>
-  <span id="userError" style="color: red;"></span>
-	<span id="displayUserName" style="color: red"></span>
-	</div> 
+			<div class="mb-3 mt-3">
+				<label for="user" class="form-label">UserId:</label> <input
+					type="text" class="form-control" id="user"
+					placeholder="Enter your userId" name="userId" onchange="onUserId()" />
+				<span id="userError" style="color: red;"></span> <span
+					id="displayUserName" style="color: red"></span>
+			</div>
 
+
+			<div class="mb-3">
+				<label for="word" class="form-label">Password:</label> <input
+					type="password" id="word" class="form-control" name="password"
+					placeholder="Enter your password" /> <span id="wordError"
+					style="color: red;"></span> <input type="checkbox"
+					onclick="myPassword()" />Show Password
+			</div>
+
+			
 		
-		<div class="mb-3">
-		<label for="word" class="form-label">Password:</label>
-		<input type="password" id="word" class="form-control" name="password" placeholder="Enter your password" /> 
-	    <span id="wordError" style="color: red;"></span> 
-	    <input type="checkbox" onclick="myPassword()"/>Show Password
+			<div align="center">
+				<input type="submit" class="btn btn-primary" value="Login"/>
+			</div>
+			<div align="center">
+	       Forgot <a href="ResetPassword.jsp">Password?</a>
+	        </div>
+	        Don't have Account? <a href="index.jsp">SignUp</a> 
+		</form>
 	</div>
-	
-	Don't have Account? <a href="index.jsp">Register here</a>
-	<div>
-	<button type="submit" class="btn btn-primary">SignIn</button>
-   </div>
-  
-</form>
-</div>
 
 
-<script>
-function myPassword() {
-	var pass=document.getElementById('word');
-   if(pass.type=='password'){
-      pass.type='text';
-    }
-   else{
-pass.type='password';
-}
-	
-}
-</script>
+	<script>
+		function myPassword() {
+			var pass = document.getElementById('word');
+			if (pass.type == 'password') {
+				pass.type = 'text';
+			} else {
+				pass.type = 'password';
+			}
+
+		}
+	</script>
 
 </body>
 </html>

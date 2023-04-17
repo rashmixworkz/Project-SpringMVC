@@ -1,5 +1,6 @@
 package com.xworkz.finalProject.repository;
 
+import java.time.LocalTime;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -25,13 +26,13 @@ public class SignUpRepoImpl implements SignUpRepo {
 	public boolean save(SignUpEntity entity) {
 		log.info("Running save method in repoImple");
 		EntityManager manager = this.entitymanager.createEntityManager();
-		
-			EntityTransaction trancsaction = manager.getTransaction();
-			trancsaction.begin();
-			manager.persist(entity);
-			trancsaction.commit();
-			return true;
-		
+
+		EntityTransaction trancsaction = manager.getTransaction();
+		trancsaction.begin();
+		manager.persist(entity);
+		trancsaction.commit();
+		return true;
+
 	}
 
 	@Override
@@ -96,69 +97,92 @@ public class SignUpRepoImpl implements SignUpRepo {
 		}
 
 	}
-	
+
 	@Override
 	public SignUpEntity signIn(String userId) {
 		log.info("Running signIn in repo");
-		EntityManager  manager=	this.entitymanager.createEntityManager();
+		EntityManager manager = this.entitymanager.createEntityManager();
 		try {
-	Query query=manager.createNamedQuery("FindByUserId");
-	query.setParameter("user", userId);
-Object obj=	query.getSingleResult();
-SignUpEntity value1=(SignUpEntity) obj;
-System.out.println(value1);
-return value1;
+			Query query = manager.createNamedQuery("FindByUserId");
+			query.setParameter("user", userId);
+			Object obj = query.getSingleResult();
+			SignUpEntity value1 = (SignUpEntity) obj;
+			System.out.println(value1);
+			return value1;
 
-		}
-		finally {
+		} finally {
 			manager.close();
 		}
 	}
 
 	@Override
 	public boolean loginCount(String userId, int count) {
-log.info("login counts"+count);
-EntityManager  manager=	this.entitymanager.createEntityManager();
-try{
-	EntityTransaction trans=manager.getTransaction();
-	trans.begin();
-	Query query=manager.createNamedQuery("loginCount");
-	query.setParameter("u", userId);
-	query.setParameter("counts", count);
-	query.executeUpdate();
-	trans.commit();
-	return true;
-}
-	finally {
-		manager.close();
-	}	
+		log.info("login counts" + count);
+		EntityManager manager = this.entitymanager.createEntityManager();
+		try {
+			EntityTransaction trans = manager.getTransaction();
+			trans.begin();
+			Query query = manager.createNamedQuery("loginCount");
+			query.setParameter("u", userId);
+			query.setParameter("counts", count);
+			query.executeUpdate();
+			trans.commit();
+			return true;
+		} finally {
+			manager.close();
+		}
 
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	/*
-	 * @Override public SignUpEntity resetPassword(String email) { EntityManager
-	 * manager= this.entitymanager.createEntityManager(); try { Query
-	 * query=manager.createNamedQuery("reset"); query.setParameter("resetEmail",
-	 * email); Object obj=query.getSingleResult(); SignUpEntity
-	 * value2=(SignUpEntity)obj; log.info(""+value2); return value2; } finally {
-	 * manager.close(); } }
-	 */
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+	@Override
+	public SignUpEntity resetPassword(String email) {
+		EntityManager manager = this.entitymanager.createEntityManager();
+		try {
+			Query query = manager.createNamedQuery("FindByEmail");
+			query.setParameter("um", email);
+			Object obj = query.getSingleResult();
+			SignUpEntity value2 = (SignUpEntity) obj;
+			log.info("" + value2);
+			return value2;
+		} finally {
+			manager.close();
+		}
+
+	}
+
+	@Override
+	public boolean update(SignUpEntity entity) {
+		EntityManager em = this.entitymanager.createEntityManager();
+		try {
+			EntityTransaction et = em.getTransaction();
+			et.begin();
+			em.merge(entity);
+			et.commit();
+			return true;
+		} finally {
+			em.close();
+		}
+	}
+
+	@Override
+	public boolean updatePassword(String userId, String password, Boolean resetPassword, LocalTime resetTime) {
+		EntityManager em = this.entitymanager.createEntityManager();
+		try {
+			EntityTransaction et = em.getTransaction();
+			et.begin();
+			Query query = em.createNamedQuery("UpdatePassword");
+			query.setParameter("uu", userId);
+			query.setParameter("p", password);
+			query.setParameter("rs", resetPassword);
+			query.setParameter("rt", resetTime);
+			query.executeUpdate();
+			et.commit();
+			return true;
+
+		} finally {
+			em.close();
+		}
+
+	}
 
 }

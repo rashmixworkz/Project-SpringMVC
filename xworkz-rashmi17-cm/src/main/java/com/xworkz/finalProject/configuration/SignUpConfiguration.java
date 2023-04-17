@@ -7,6 +7,8 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
@@ -41,5 +43,11 @@ public class SignUpConfiguration {
 		return new BCryptPasswordEncoder();
 		
 	}
+	/*
+	 * @Bean public MultipartResolver multipartResolver() {
+	 * log.info("Running multipartResolver in configuration"); return new ;
+	 * 
+	 * }
+	 */
 
 }
